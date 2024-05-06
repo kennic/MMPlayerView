@@ -222,6 +222,8 @@ public class MMPlayerLayer: AVPlayerLayer {
     public var isShrink: Bool {
         return shrinkControl.isShrink
     }
+	
+	var autoResume = true
     
     // MARK: - Private Parameter
     lazy var subtitleView = MMSubtitleView()
@@ -425,10 +427,18 @@ extension MMPlayerLayer {
         self.initStatus()
         self.asset = nil
     }
+	
+	public func pause() {
+		player?.pause()
+		currentPlayStatus = .pause
+		autoResume = false
+	}
+	
     /**
      Start player to play video
      */
     public func resume() {
+		autoResume = true
         switch self.currentPlayStatus {
         case .playing , .pause:
             if (self.player?.currentItem?.asset as? AVURLAsset)?.url == self.asset?.url {
@@ -598,7 +608,7 @@ extension MMPlayerLayer {
         })
         
         NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: nil, using: { [weak self] (nitification) in
-            if self?.isBackgroundPause == false {
+			if self?.isBackgroundPause == false && self?.autoResume == true {
                 self?.player?.play()
             }
             self?.isBackgroundPause = false
